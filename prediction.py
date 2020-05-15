@@ -88,7 +88,8 @@ from model import StudentNet
 model_dir = './student_model.bin'
 
 #model_best = torch.load('gdrive/My Drive/ml/hw3/models/model5.pth')
-model_best = torch.load(model_dir)
+model_best = StudentNet(base=16).cuda()
+model_best.load_state_dict(torch.load(model_dir))
 
 test_loader = get_dataloader('testing', batch_size=32)
 

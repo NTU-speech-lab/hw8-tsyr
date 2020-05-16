@@ -85,26 +85,30 @@ def get_dataloader(mode='training', batch_size=32):
 
 #######################################################
 from model import StudentNet
-model_dir = './student_model.bin'
+import numpy as np
+from weight_quantization import decode16
+model_dir = './8_bit_model.pkl'
 
 #model_best = torch.load('gdrive/My Drive/ml/hw3/models/model5.pth')
 model_best = StudentNet(base=16).cuda()
-model_best.load_state_dict(torch.load(model_dir))
+#model_best.load_state_dict(torch.load(model_dir))
+model_best.load_state_dict(decode8(model_dir))
 
 test_loader = get_dataloader('testing', batch_size=32)
 
 model_best.eval()
 prediction = []
 with torch.no_grad():
-    for i, data in enumerate(test_loader):
-        test_pred = model_best(data.cuda())
-        test_label = np.argmax(test_pred.cpu().data.numpy(), axis=1)
-        for y in test_label:
-            prediction.append(y)
+	for i, data in enumerate(test_loader):
+		inputs, labels = data
+		test_pred = model_best(inputs.cuda())
+		test_label = np.argmax(test_pred.cpu().data.numpy(), axis=1)
+		for y in test_label:
+			prediction.append(y)
 
 #將結果寫入 csv 檔
 with open("./predict.csv", 'w') as f:
-    f.write('Id,Category\n')
+    f.write('id,label\n')
     for i, y in  enumerate(prediction):
         f.write('{},{}\n'.format(i, y))
 
